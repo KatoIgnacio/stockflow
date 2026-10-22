@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f7f8" />
+    <meta
+      name="description"
+      content="StockFlow: inventario, clientes y pedidos en un solo lugar."
+    />
+    <title>StockFlow · Tu operación, en orden</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <script>
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("stockflow-theme") ||
+          (matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+      } catch (_) {}
+    </script>
+    <link rel="stylesheet" href="/assets/app.css" />
+    <script type="module" src="/assets/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Ir al contenido</a>
+    <div id="app" class="app-shell">
+      <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
+        <a class="brand" href="#/resumen" aria-label="StockFlow, inicio">
+          <span class="brand-mark"
+            ><svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <path
+                d="m16 3 12 7v12l-12 7-12-7V10L16 3Z"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path
+                d="m4 10 12 7 12-7M16 17v12M10 6.5l12 7V20"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linejoin="round"
+              /></svg
+          ></span>
+          <span
+            >Stock<span class="brand-light">Flow</span
+            ><small>WORKSPACE</small></span
+          >
+        </a>
+        <div class="workspace-label">
+          <span class="workspace-avatar">G</span
+          ><span>GlobalRetail<small>Gestión de operaciones</small></span
+          ><span class="workspace-dot"></span>
+        </div>
+        <div class="nav-label">PRINCIPAL</div>
+        <nav id="navigation"></nav>
+        <div class="sidebar-bottom">
+          <div class="connection-card">
+            <span id="connection-dot" class="connection-dot"></span>
+            <div>
+              <strong id="connection-label">Conectando…</strong
+              ><small>Tu información, actualizada</small>
+            </div>
+          </div>
+          <div class="sidebar-signature">
+            <span class="signature-avatar">SF</span>
+            <div>
+              <strong>Tu espacio de trabajo</strong
+              ><small>Inventario con claridad</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <button
+        id="sidebar-overlay"
+        class="sidebar-overlay"
+        aria-label="Cerrar menú"
+        hidden
+      ></button>
+      <div class="workspace">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              id="menu-toggle"
+              class="icon-button mobile-menu"
+              aria-label="Abrir menú"
+              aria-expanded="false"
+              aria-controls="sidebar"
+            ></button
+            ><span class="breadcrumb-root">Espacio de trabajo</span
+            ><span class="breadcrumb-divider">/</span
+            ><span id="breadcrumb-current">Resumen</span>
+          </div>
+          <div class="topbar-actions">
+            <span id="today" class="today"></span
+            ><span class="topbar-separator"></span
+            ><button
+              id="refresh-button"
+              class="icon-button"
+              aria-label="Actualizar datos"
+              title="Actualizar datos"
+            ></button
+            ><span class="topbar-avatar" title="GlobalRetail">G</span>
+          </div>
+        </header>
+        <main id="main" class="main-content" tabindex="-1">
+          <div class="initial-loading">
+            <span class="spinner"></span>
+            <p>Preparando tu espacio de trabajo…</p>
+          </div>
+        </main>
+        <footer class="app-footer">
+          <span
+            >StockFlow <span class="footer-dot">·</span> Tu operación, en
+            orden.</span
+          ><span id="last-updated"></span>
+        </footer>
+      </div>
+    </div>
+    <button
+      id="theme-toggle"
+      class="icon-button theme-toggle"
+      type="button"
+      aria-label="Cambiar tema"
+      title="Cambiar tema"
+    ></button>
+    <dialog id="modal" class="modal" aria-labelledby="modal-title"></dialog>
+    <div
+      id="toasts"
+      class="toast-container"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
+    <noscript>Activa JavaScript para utilizar StockFlow.</noscript>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 # StockFlow
 
-API REST para gestionar productos, clientes, inventario y pedidos de GlobalRetail S.A.
+Aplicación web para gestionar productos, clientes, inventario y pedidos de GlobalRetail S.A., con interfaz adaptable, temas claro/oscuro y API REST.
 
 **Integrantes:** Kato Bello Martínez y Jaime Palavecino Suárez. Universidad del Bío-Bío, Desarrollo Web Orientado a Objetos.
 
@@ -21,7 +21,9 @@ docker compose up -d --wait
 .\gradlew.bat bootRun
 ```
 
-La API queda disponible en **http://localhost:8081** y responde en JSON. Para comprobar el arranque, abrir:
+Abrir **http://localhost:8081** para usar StockFlow. El frontend se sirve desde Spring Boot y viene incluido en el JAR: no necesita instalar Node.js ni iniciar otro servidor.
+
+La API sigue disponible en JSON. Para comprobarla directamente, abrir:
 
 - http://localhost:8081/api/productos
 - http://localhost:8081/api/clientes
@@ -29,11 +31,25 @@ La API queda disponible en **http://localhost:8081** y responde en JSON. Para co
 
 En Linux/macOS se utiliza `./gradlew` en lugar de `.\gradlew.bat`. No es necesario instalar Gradle por separado.
 
-Para detener la API, presionar `Ctrl+C`. Para detener PostgreSQL conservando los datos:
+Para detener la aplicación, presionar `Ctrl+C`. Para detener PostgreSQL conservando los datos:
 
 ```powershell
 docker compose stop
 ```
+
+## Interfaz web
+
+- **Resumen:** métricas reales, actividad de pedidos de 7 o 30 días, estado del inventario, pedidos recientes y alertas de reposición.
+- **Inventario:** crear, consultar, editar y desactivar productos; buscar por nombre/código, ordenar, paginar y filtrar stock bajo o agotado.
+- **Clientes:** crear, buscar, editar y desactivar clientes; consultar su historial y el detalle de sus pedidos.
+- **Pedidos:** seleccionar cliente, agregar varios productos, ajustar cantidades y confirmar la compra; consultar detalle, filtrar por fechas/cliente y descargar su JSON. El servidor valida las existencias y calcula el total definitivo.
+- **Reportes:** inventario actual y pedidos por período, con exportación CSV para Excel y JSON con todos los detalles.
+
+El tema claro/oscuro se cambia desde el botón flotante de la esquina inferior derecha, se guarda en el navegador y inicialmente respeta la preferencia del sistema. En pantallas pequeñas, el menú lateral se abre con el botón superior izquierdo. El botón de actualizar vuelve a consultar los datos del servidor.
+
+Los importes se muestran en CLP. El stock bajo corresponde a existencias **inferiores** al mínimo. Desactivar un producto o cliente conserva los pedidos anteriores. El sistema actual registra pedidos en estado `PENDIENTE`; no contempla pagos, cancelación ni cambios de estado. No incluye inicio de sesión: está preparado para la demostración y el uso local.
+
+El código de la interfaz está en `src/main/resources/static/`, con HTML, CSS y módulos JavaScript sin dependencias externas. Las rutas `#/...` permiten navegar y recargar cada sección. Todas las operaciones usan la API del mismo servidor.
 
 ## Base de datos y ejemplos automáticos
 
@@ -127,7 +143,7 @@ docker compose -f compose.test.yaml -p stockflow-verificacion down
 
 Las pruebas PostgreSQL utilizan una instancia separada en `localhost:5433/stockflow_test`; vacían únicamente esa base. Se puede configurar con `TEST_DB_URL`, `TEST_DB_USER` y `TEST_DB_PASSWORD`, manteniendo el nombre `stockflow_test`.
 
-Se comprueban CRUD, filtros, validaciones, reportes, borrado lógico, precios históricos, pedidos con varios ítems, rechazo completo, concurrencia, carga automática desde una base vacía y persistencia tras reiniciar. Las pruebas de servicios usan sus propios datos; las del JAR comprueban los ejemplos automáticos.
+Se comprueban CRUD, filtros, validaciones, reportes, borrado lógico, precios históricos, pedidos con varios ítems, rechazo completo, concurrencia, carga automática desde una base vacía, persistencia tras reiniciar y disponibilidad del frontend y sus recursos. Las pruebas de servicios usan sus propios datos; las del JAR comprueban los ejemplos automáticos.
 
 - Reportes HTML: `build/reports/tests/test/index.html`, `build/reports/tests/postgresTest/index.html` y `build/reports/tests/jarSmokeTest/index.html`.
 - Ejecutable: `build/libs/stockflow-0.0.1-SNAPSHOT.jar`. Se inicia con `java -jar build/libs/stockflow-0.0.1-SNAPSHOT.jar` y requiere PostgreSQL disponible.

@@ -229,11 +229,27 @@ class ApiAcceptanceTests {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {"/", "/api/ruta-inexistente"})
+	@ValueSource(strings = {"/pagina-inexistente", "/api/ruta-inexistente"})
 	void rutaInexistenteDevuelve404(String ruta) throws Exception {
 		var respuesta = enviar("GET", ruta, null);
 		assertThat(respuesta.statusCode()).isEqualTo(404);
 		assertThat(json(respuesta).path("mensaje").asText()).isEqualTo("Ruta no encontrada");
+	}
+
+	@Test
+	void inicioSirveFrontendYRecursosDesdeLaMismaAplicacion() throws Exception {
+		var inicio = enviar("GET", "/", null);
+		assertThat(inicio.statusCode()).isEqualTo(200);
+		assertThat(inicio.headers().firstValue("Content-Type").orElse("")).contains("text/html");
+		assertThat(inicio.body()).contains("lang=\"es\"", "/assets/app.js", "/assets/app.css");
+		for (String recurso : List.of("app.js", "api.js", "utils.js", "icons.js", "charts.js", "app.css", "favicon.svg")) {
+			var respuesta = enviar("GET", "/assets/" + recurso, null);
+			assertThat(respuesta.statusCode()).as(recurso).isEqualTo(200);
+			assertThat(respuesta.body()).as(recurso).isNotBlank();
+			assertThat(respuesta.headers().firstValue("Content-Type").orElse("")).as(recurso)
+				.contains(recurso.endsWith(".js") ? "javascript" : recurso.endsWith(".css") ? "text/css" : "image/svg+xml");
+		}
+		assertThat(json(enviar("GET", "/api/productos", null)).isArray()).isTrue();
 	}
 
 	@ParameterizedTest
