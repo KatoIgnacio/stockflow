@@ -28,6 +28,59 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+tasks.named('processResources') {
+	// Una sola fuente del SQL: también queda disponible dentro del JAR ejecutable.
+	from('database/demo-data.sql')
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
+	exclude '**/JarPersistenceTests.class'
+	exclude '**/DemoDataPostgresTests.class'
+}
+
+tasks.register('postgresTest', Test) {
+	description = 'Ejecuta las mismas pruebas sobre una base PostgreSQL exclusiva para pruebas.'
+	group = 'verification'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform()
+	exclude '**/JarPersistenceTests.class'
+	outputs.upToDateWhen { false }
+	shouldRunAfter tasks.named('test')
+	doFirst {
+		def testUrl = System.getenv('TEST_DB_URL') ?: 'jdbc:postgresql://localhost:5433/stockflow_test'
+		if (!(testUrl ==~ /jdbc:postgresql:\/\/[^\/]+\/stockflow_test(\?.*)?/)) {
+			throw new GradleException('postgresTest solo permite una base llamada stockflow_test.')
+		}
+		systemProperty 'spring.datasource.url', testUrl
+		systemProperty 'spring.datasource.driver-class-name', 'org.postgresql.Driver'
+		systemProperty 'spring.datasource.username', System.getenv('TEST_DB_USER') ?: 'postgres'
+		systemProperty 'spring.datasource.password', System.getenv('TEST_DB_PASSWORD') ?: 'postgres'
+		systemProperty 'spring.sql.init.mode', 'always'
+		systemProperty 'spring.jpa.hibernate.ddl-auto', 'validate'
+	}
+}
+
+tasks.register('jarSmokeTest', Test) {
+	description = 'Verifica el JAR y la persistencia después de reiniciar su proceso.'
+	group = 'verification'
+	dependsOn tasks.named('bootJar'), tasks.named('testClasses')
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform()
+	include '**/JarPersistenceTests.class'
+	outputs.upToDateWhen { false }
+	shouldRunAfter tasks.named('test'), tasks.named('postgresTest')
+	doFirst {
+		def testUrl = System.getenv('TEST_DB_URL') ?: 'jdbc:postgresql://localhost:5433/stockflow_test'
+		if (!(testUrl ==~ /jdbc:postgresql:\/\/[^\/]+\/stockflow_test(\?.*)?/)) {
+			throw new GradleException('jarSmokeTest solo permite una base llamada stockflow_test.')
+		}
+		systemProperty 'stockflow.test.dbUrl', testUrl
+		systemProperty 'stockflow.test.dbUser', System.getenv('TEST_DB_USER') ?: 'postgres'
+		systemProperty 'stockflow.test.dbPassword', System.getenv('TEST_DB_PASSWORD') ?: 'postgres'
+		systemProperty 'stockflow.test.jar', tasks.named('bootJar').get().archiveFile.get().asFile.absolutePath
+		systemProperty 'stockflow.test.log', layout.buildDirectory.file('reports/jarSmokeTest/application.log').get().asFile.absolutePath
+	}
 }

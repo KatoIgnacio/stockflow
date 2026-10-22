@@ -15,9 +15,23 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<ApiError> parametroInvalido(
+			MethodArgumentTypeMismatchException error, HttpServletRequest request) {
+		return respuesta(HttpStatus.BAD_REQUEST,
+				"El parámetro " + error.getName() + " tiene un formato inválido", request, List.of());
+	}
+
+	@ExceptionHandler(NoResourceFoundException.class)
+	public ResponseEntity<ApiError> rutaInexistente(NoResourceFoundException error, HttpServletRequest request) {
+		return respuesta(HttpStatus.NOT_FOUND, "Ruta no encontrada", request, List.of());
+	}
 
 	@ExceptionHandler(RecursoNoEncontradoException.class)
 	public ResponseEntity<ApiError> noEncontrado(
